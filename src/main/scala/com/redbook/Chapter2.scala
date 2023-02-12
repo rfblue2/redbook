@@ -2,7 +2,7 @@ package com.redbook
 
 import scala.annotation.tailrec
 
-object Exercise1 {
+object Chapter2Ex1 {
   // Write tail recursive fibonacci
 
   // @tailrec // should throw a compile error
@@ -39,7 +39,7 @@ object Exercise1 {
   }
 }
 
-object Exercise2 {
+object Chapter2Ex2 {
   def isSorted[A](as: Array[A], ordered: (A, A) => Boolean): Boolean = {
     as match {
       case as if as.length < 2 => true
@@ -58,17 +58,17 @@ object Exercise2 {
   }
 }
 
-object Exercise3 {
+object Chapter2Ex3 {
   def curry[A, B, C](f: (A, B) => C): A => (B => C) =
     a => b => f(a, b)
 }
 
-object Exercise4 {
+object Chapter2Ex4 {
   def uncurry[A, B, C](f: A => B => C): (A, B) => C =
     (a, b) => f(a)(b)
 }
 
-object Exercise5 {
+object Chapter2Ex5 {
   def compose[A, B, C](f: B => C, g: A => B): A => C =
     a => f(g(a))
 }
