@@ -203,15 +203,13 @@ object StateRand {
     }
 
     def nonNegativeInt: Rand[Int] =
-      for {
-        r <- State.get[RNG]
-        (x, _) = r.nextInt
-      } yield {
+      State(r => {
+        val (x, r1) = r.nextInt
         if (x == Integer.MIN_VALUE) {
-          val (i, _) = rng.nextInt
-          Math.abs(i)
-        } else Math.abs(x)
-      }
+          val (i, r2) = rng.nextInt
+          (Math.abs(i), r2)
+        } else (Math.abs(x), r1)
+      })
 
     def double: Rand[Double] =
       for (i <- nonNegativeInt) yield Math.abs(i.toDouble / Integer.MAX_VALUE)
