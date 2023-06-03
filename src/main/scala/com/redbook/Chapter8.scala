@@ -126,6 +126,11 @@ object Chapter8 {
 
     def int: Rand[Int] = State[RNG, Int](_.nextInt)
 
+    def stringN(n: Int): Gen[String] =
+      listOfN(n, choose(0, 127)).map(_.map(_.toChar).mkString)
+
+    val string: SGen[String] = SGen(stringN)
+
     private def bool: Rand[Boolean] =
       for { i <- int } yield i % 2 == 0
 
@@ -205,12 +210,21 @@ object Chapter8 {
       s"test case: $s\n" +
         s"generated an exception: ${e.getMessage}\n" +
         s"stack trace:\n ${e.getStackTrace.mkString("\n")}"
+
+    object ** {
+      def unapply[A, B](p: (A, B)) = Some(p)
+    }
   }
 
   case class SGen[A](forSize: Int => Gen[A]) {
     // Ex 11
 //    def flatMap[B](f: A => SGen[B]): SGen[B] =
 //      SGen(n => forSize(n).map(f).)
+
+    def **[B](s2: SGen[B]): SGen[(A, B)] =
+      SGen(n => apply(n) ** s2(n))
+
+    def apply(n: Int): Gen[A] = forSize(n)
   }
 
   object SGen {
