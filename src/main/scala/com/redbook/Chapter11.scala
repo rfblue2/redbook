@@ -1,32 +1,34 @@
 package com.redbook
 
+import Chapter12._
+
 object Chapter11 {
   trait Functor[F[_]] {
     def map[A, B](fa: F[A])(f: A => B): F[B]
   }
-  trait Monad[F[_]] extends Functor[F] {
+  trait Monad[F[_]] extends Functor[F] with Applicative[F] {
     def unit[A](a: => A): F[A]
     def flatMap[A, B](ma: F[A])(f: A => F[B]): F[B]
-    def map[A, B](ma: F[A])(f: A => B): F[B] =
+    override def map[A, B](ma: F[A])(f: A => B): F[B] =
       flatMap(ma)(a => unit(f(a)))
     def map2[A, B, C](ma: F[A], mb: F[B])(f: (A, B) => C): F[C] =
       flatMap(ma)(a => map(mb)(b => f(a, b)))
 
     // Ex3
-    def sequence[A](lma: List[F[A]]): F[List[A]] =
+    override def sequence[A](lma: List[F[A]]): F[List[A]] =
       lma.foldRight(unit(List[A]()): F[List[A]]) { (next, acc) =>
         flatMap(acc) { l => map(next) { _ :: l } }
       }
 
     // Ex3
-    def traverse[A, B](la: List[A])(f: A => F[B]): F[List[B]] = {
+    override def traverse[A, B](la: List[A])(f: A => F[B]): F[List[B]] = {
       la.foldRight(unit(List[B]()): F[List[B]]) { (next, acc) =>
         flatMap(acc) { l => map(f(next))(_ :: l) }
       }
     }
 
     // Ex4
-    def replicateM[A](n: Int, ma: F[A]): F[List[A]] =
+    override def replicateM[A](n: Int, ma: F[A]): F[List[A]] =
       if (n <= 0) unit(List())
       else map2(ma, replicateM(n - 1, ma))(_ :: _)
 
@@ -94,7 +96,6 @@ object Chapter11 {
 
     def composeByJoin[A, B, C](f: A => F[B], g: B => F[C]): A => F[C] =
       a => join(map(f(a))(g))
-
   }
 
   object Monad {
